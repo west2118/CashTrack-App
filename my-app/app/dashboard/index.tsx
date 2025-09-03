@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,24 @@ import {
   Image,
   SafeAreaView,
   Dimensions,
+  ProgressBarAndroidBase,
+  Pressable,
 } from "react-native";
 import { FontAwesome, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { PieChart, BarChart } from "react-native-chart-kit";
+import * as Progress from "react-native-progress";
 
 const CashTrackDashboard = () => {
+  const [selectedOption, setSelectedOption] = useState("Goal");
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const options = ["Goal", "Limit"];
+
+  const handleSelect = (option: string) => {
+    setSelectedOption(option);
+    setShowDropdown(false);
+  };
+
   // Static data for demonstration
   const userData = {
     name: "Alex Johnson",
@@ -191,9 +204,9 @@ const CashTrackDashboard = () => {
         </View>
 
         {/* Balance Card */}
-        <View className="bg-white rounded-2xl p-5 shadow-xl mb-6">
+        <View className="bg-white rounded-2xl p-5 shadow-lg mb-6">
           <Text className="text-gray-500 mb-2">Total Balance</Text>
-          <Text className="text-4xl font-bold text-gray-900 mb-4">
+          <Text className="text-4xl font-bold text-gray-900 mb-6">
             {userData.totalBalance}
           </Text>
           <View className="flex-row justify-between mt-4">
@@ -221,112 +234,111 @@ const CashTrackDashboard = () => {
         </View>
 
         {/* Expense Chart */}
-        <View className="bg-white rounded-2xl p-5 shadow-xl mb-6">
-          <View className="flex-row justify-between items-center mb-4">
+        <View className="bg-white rounded-2xl p-5 shadow-lg mb-6">
+          <View className="flex-row justify-between items-center mb-6">
             <Text className="text-lg font-bold text-gray-900">
               Expense Overview
             </Text>
-            <TouchableOpacity>
-              <Text className="text-blue-600 text-sm">View All</Text>
-            </TouchableOpacity>
+            <View className="border border-gray-300 rounded-md px-3 py-2">
+              <Text className="text-gray-700 text-sm">Today</Text>
+            </View>
           </View>
 
-          {/* Chart visualization */}
-          {/* <View className="flex-row items-end h-40 justify-between mb-6 px-4">
-            <View className="items-center">
-              <View
-                className="w-8 bg-red-400 rounded-t-lg"
-                style={{ height: 100 }}
-              />
-              <Text className="text-xs mt-1 text-gray-500">Food</Text>
-            </View>
-            <View className="items-center">
-              <View
-                className="w-8 bg-blue-400 rounded-t-lg"
-                style={{ height: 60 }}
-              />
-              <Text className="text-xs mt-1 text-gray-500">Transport</Text>
-            </View>
-            <View className="items-center">
-              <View
-                className="w-8 bg-yellow-400 rounded-t-lg"
-                style={{ height: 120 }}
-              />
-              <Text className="text-xs mt-1 text-gray-500">Shopping</Text>
-            </View>
-            <View className="items-center">
-              <View
-                className="w-8 bg-green-400 rounded-t-lg"
-                style={{ height: 40 }}
-              />
-              <Text className="text-xs mt-1 text-gray-500">Bills</Text>
-            </View>
-            <View className="items-center">
-              <View
-                className="w-8 bg-purple-400 rounded-t-lg"
-                style={{ height: 80 }}
-              />
-              <Text className="text-xs mt-1 text-gray-500">Entertainment</Text>
-            </View>
-          </View> */}
           <View>
-            {/* Category Pie Chart */}
-            <View>
-              <PieChart
-                data={categoryData}
-                width={screenWidth - 40}
-                height={200}
-                chartConfig={chartConfig}
-                accessor={"amount"}
-                backgroundColor={"transparent"}
-                paddingLeft={"15"}
-                center={[10, 0]}
-                absolute
-              />
-            </View>
+            <PieChart
+              data={categoryData}
+              width={screenWidth - 40}
+              height={200}
+              chartConfig={chartConfig}
+              accessor={"amount"}
+              backgroundColor={"transparent"}
+              paddingLeft={"0"}
+              center={[10, 0]}
+              absolute
+            />
+          </View>
+        </View>
 
-            {/* Daily Expense Bar Chart */}
-            {/* <View className="mt-6">
-              <Text className="text-lg font-bold mb-2">Daily Expenses</Text>
-              <BarChart
-                data={dailyExpenseData}
-                width={screenWidth - 40}
-                height={220}
-                yAxisLabel="$"
-                chartConfig={chartConfig}
-                verticalLabelRotation={0}
-                fromZero={true}
+        <View className="bg-white rounded-2xl p-5 shadow-lg mb-6">
+          <View className="flex-row justify-between items-center mb-6">
+            <Text className="text-lg font-bold text-gray-900">
+              Expense Limit
+            </Text>
+            <TouchableOpacity
+              className="border border-gray-300 rounded-md px-3 py-2 flex-row justify-between items-center gap-2"
+              onPress={() => setShowDropdown(!showDropdown)}>
+              <Text className="text-gray-700">{selectedOption}</Text>
+              <MaterialIcons
+                name="keyboard-arrow-down"
+                size={20}
+                color="#4B5563"
               />
-            </View> */}
+            </TouchableOpacity>
+
+            {showDropdown && (
+              <View className="absolute top-12 right-0 w-32 bg-white border border-gray-300 rounded-md shadow-md z-50">
+                {options.map((option) => (
+                  <Pressable
+                    key={option}
+                    className="px-3 py-2"
+                    onPress={() => handleSelect(option)}>
+                    <Text className="text-gray-700">{option}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
           </View>
 
-          {/* Category progress bars */}
-          {renderCategoryBars()}
+          <View>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <View
+                key={i}
+                className="flex-row items-center bg-white rounded-xl shadow-lg p-3 mb-3">
+                {/* Icon box */}
+                <View className="bg-red-600 w-10 h-10 rounded-lg items-center justify-center mr-3">
+                  <FontAwesome name="bell" size={18} color="white" />
+                </View>
+
+                {/* Content */}
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-gray-800">
+                    Food
+                  </Text>
+
+                  {/* Progress + Label */}
+                  <View className="flex-row items-center justify-between">
+                    <Progress.Bar
+                      progress={600 / 800}
+                      width={210}
+                      style={{ backgroundColor: "#e5e7eb" }} // light gray track
+                      borderWidth={0}
+                      color="#b91c1c" // muted red fill
+                    />
+                    <Text className="text-xs text-gray-600">600/800</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
         </View>
 
         {/* Recent Transactions */}
-        <View className="bg-white rounded-2xl p-5 shadow-xl mb-10">
-          <View className="flex-row justify-between items-center mb-4">
+        <View className="bg-white rounded-2xl p-5 shadow-lg mb-10">
+          <View className="flex-row justify-between items-center mb-6">
             <Text className="text-lg font-bold text-gray-900">
               Recent Transactions
             </Text>
-            <TouchableOpacity>
-              <Text className="text-blue-600 text-sm">See All</Text>
+            <TouchableOpacity className="border border-gray-300 rounded-md px-3 py-2">
+              <Text className="text-gray-700 text-sm">View All</Text>
             </TouchableOpacity>
           </View>
 
           {recentTransactions.map((transaction) => (
             <View
               key={transaction.id}
-              className="flex-row items-center py-3 border-b border-gray-100 last:border-b-0">
-              <View
-                className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${
-                  transaction.type === "income" ? "bg-green-100" : "bg-red-100"
-                }`}>
-                <FontAwesome
-                  size={18}
-                  color={transaction.type === "income" ? "#10B981" : "#EF4444"}
-                />
+              className="flex-row items-center py-3 bg-white rounded-xl shadow-lg p-3 mb-3">
+              <View className="bg-red-600 w-10 h-10 rounded-lg items-center justify-center mr-3">
+                <FontAwesome name="bell" size={18} color="white" />
               </View>
               <View className="flex-1">
                 <Text className="font-medium text-gray-900">
